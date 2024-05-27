@@ -1,5 +1,6 @@
 package br.com.alura.med.voll.alura_medVoll_api.models;
 
+import br.com.alura.med.voll.alura_medVoll_api.dto.DadosCadastroPaciente;
 import jakarta.persistence.*;
 import lombok.AllArgsConstructor;
 import lombok.EqualsAndHashCode;
@@ -25,5 +26,14 @@ public class Paciente {
 
     @Embedded
     private Endereco endereco;
+
+    public Paciente(DadosCadastroPaciente dadosCadastroPaciente) {
+        this.nome = dadosCadastroPaciente.nome();
+        this.email = dadosCadastroPaciente.email();
+        this.cpf = dadosCadastroPaciente.email();
+        this.telefone = dadosCadastroPaciente.telefone();
+        this.endereco = new Endereco(dadosCadastroPaciente.endereco());
+
+    }
 }
 
