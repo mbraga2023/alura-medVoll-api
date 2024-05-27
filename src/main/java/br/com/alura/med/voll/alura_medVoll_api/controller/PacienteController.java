@@ -6,6 +6,7 @@ import br.com.alura.med.voll.alura_medVoll_api.models.Medico;
 import br.com.alura.med.voll.alura_medVoll_api.models.Paciente;
 import br.com.alura.med.voll.alura_medVoll_api.repository.PacienteRepository;
 import jakarta.transaction.Transactional;
+import jakarta.validation.Valid;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.web.bind.annotation.PostMapping;
 import org.springframework.web.bind.annotation.RequestBody;
@@ -26,7 +27,7 @@ public class PacienteController {
 
     @PostMapping("")
     @Transactional
-    public void cadastrar(@RequestBody DadosCadastroPaciente dadosCadastroPaciente) {
+    public void cadastrar(@RequestBody @Valid DadosCadastroPaciente dadosCadastroPaciente) {
         pacienteRepository.save(new Paciente(dadosCadastroPaciente));
     }
 }
