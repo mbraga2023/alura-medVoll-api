@@ -10,7 +10,9 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.Pageable;
 import org.springframework.data.web.PageableDefault;
+import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
+import org.springframework.web.util.UriComponentsBuilder;
 
 @RestController
 @RequestMapping("paciente")
@@ -26,26 +28,34 @@ public class PacienteController {
 
     @PostMapping("")
     @Transactional
-    public void cadastrar(@RequestBody @Valid DadosCadastroPaciente dadosCadastroPaciente) {
-        pacienteRepository.save(new Paciente(dadosCadastroPaciente));
+    public ResponseEntity cadastrar(@RequestBody @Valid DadosCadastroPaciente dadosCadastroPaciente, UriComponentsBuilder uriComponentsBuilder) {
+        var paciente = new Paciente(dadosCadastroPaciente);
+        pacienteRepository.save(paciente);
+        var uri = uriComponentsBuilder.path("/paciente/{id}")
+                .buildAndExpand(paciente.getId()).toUri();
+        return ResponseEntity.created(uri)
+                .body(new DadosDetalhamentoPaciente(paciente));
     }
 
     @GetMapping("/lista")
-    public Page<DtoListaPaciente> listar(@PageableDefault(size=10, sort = {"nome"}) Pageable paginacao){
-        return pacienteRepository.findAllByAtivoTrue(paginacao).map(DtoListaPaciente::new);
+    public ResponseEntity<Page<DtoListaPaciente>> listar(@PageableDefault(size=10, sort = {"nome"}) Pageable paginacao){
+        var page = pacienteRepository.findAllByAtivoTrue(paginacao).map(DtoListaPaciente::new);
+        return ResponseEntity.ok(page);
     }
 
     @PutMapping
     @Transactional
-    public void atualizar(@RequestBody @Valid DtoAtualizarPaciente dtoAtualizar){
+    public ResponseEntity atualizar(@RequestBody @Valid DtoAtualizarPaciente dtoAtualizar){
         var paciente = pacienteRepository.getReferenceById(dtoAtualizar.id());
         paciente.atualizarInformacoes(dtoAtualizar);
+        return ResponseEntity.ok(new DadosDetalhamentoPaciente(paciente));
     }
 
     @DeleteMapping("/{id}")
     @Transactional
-    public void excluir(@PathVariable Long id){
+    public ResponseEntity excluir(@PathVariable Long id){
         var paciente = pacienteRepository.getReferenceById(id);
         paciente.excluir();
+        return ResponseEntity.noContent().build();
     }
 }
