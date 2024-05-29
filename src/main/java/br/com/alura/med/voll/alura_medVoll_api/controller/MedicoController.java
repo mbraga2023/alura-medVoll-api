@@ -1,9 +1,6 @@
 package br.com.alura.med.voll.alura_medVoll_api.controller;
 
-import br.com.alura.med.voll.alura_medVoll_api.dto.DadosCadastroMedico;
-import br.com.alura.med.voll.alura_medVoll_api.dto.DadosDetalhamentoMedico;
-import br.com.alura.med.voll.alura_medVoll_api.dto.DtoAtualizarMedico;
-import br.com.alura.med.voll.alura_medVoll_api.dto.DtoListaMedico;
+import br.com.alura.med.voll.alura_medVoll_api.dto.*;
 import br.com.alura.med.voll.alura_medVoll_api.models.Medico;
 import br.com.alura.med.voll.alura_medVoll_api.repository.MedicoRepository;
 import jakarta.transaction.Transactional;
@@ -85,6 +82,13 @@ public class MedicoController {
         var medico = medicoRepository.getReferenceById(id);
         medico.excluir();
         return ResponseEntity.noContent().build();
+    }
+
+    @GetMapping("/{id}")
+    public ResponseEntity detalhar(@PathVariable Long id){
+        var medico = medicoRepository.getReferenceById(id);
+
+        return ResponseEntity.ok(new DadosDetalhamentoMedico(medico));
     }
 
 }
