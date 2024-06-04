@@ -2,12 +2,13 @@ package br.com.alura.med.voll.alura_medVoll_api.service.validacoes;
 
 import br.com.alura.med.voll.alura_medVoll_api.dto.DadosAgendamentoConsulta;
 import br.com.alura.med.voll.alura_medVoll_api.infra.ValidacaoException;
+import org.springframework.stereotype.Component;
 
-import java.time.DayOfWeek;
 import java.time.Duration;
 import java.time.LocalDateTime;
 
-public class ValidadorHorarioAntecedencia {
+@Component
+public class ValidadorHorarioAntecedencia implements ValidadorAgendamentoConsulta{
         public void validar(DadosAgendamentoConsulta dados){
             var dataConsulta = dados.data();
 

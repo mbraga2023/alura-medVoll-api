@@ -4,12 +4,16 @@ import br.com.alura.med.voll.alura_medVoll_api.dto.DadosAgendamentoConsulta;
 import br.com.alura.med.voll.alura_medVoll_api.infra.ValidacaoException;
 import br.com.alura.med.voll.alura_medVoll_api.repository.MedicoRepository;
 import br.com.alura.med.voll.alura_medVoll_api.repository.PacienteRepository;
+import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.stereotype.Component;
 
 import java.time.Duration;
 import java.time.LocalDateTime;
 
-public class ValidadorPacienteAtivo {
+@Component
+public class ValidadorPacienteAtivo implements ValidadorAgendamentoConsulta{
 
+    @Autowired
     private PacienteRepository repository;
 
         public void validar(DadosAgendamentoConsulta dados){
