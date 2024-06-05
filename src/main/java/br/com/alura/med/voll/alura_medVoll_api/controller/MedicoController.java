@@ -13,8 +13,6 @@ import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
 import org.springframework.web.util.UriComponentsBuilder;
 
-import java.util.List;
-
 @RestController
 @RequestMapping("medicos")
 public class MedicoController {
@@ -47,8 +45,10 @@ public class MedicoController {
     }*/
 
     @GetMapping ("")
-    public ResponseEntity<Page<DtoListaMedico>>listar(@PageableDefault(size=10, sort = {"nome"}) Pageable paginacao){
-        var page = medicoRepository.findAllByAtivoTrue(paginacao).map(DtoListaMedico::new);
+    public ResponseEntity<Page<DtoListaMedico>>listar(
+            @PageableDefault(size=10, sort = {"nome"}) Pageable paginacao){
+        var page = medicoRepository.findAllByAtivoTrue(paginacao)
+                .map(DtoListaMedico::new);
         return ResponseEntity.ok(page);
 
     }
