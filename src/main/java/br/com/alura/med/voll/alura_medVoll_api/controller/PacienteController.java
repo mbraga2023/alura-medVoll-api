@@ -4,6 +4,7 @@ import br.com.alura.med.voll.alura_medVoll_api.dto.*;
 import br.com.alura.med.voll.alura_medVoll_api.models.Medico;
 import br.com.alura.med.voll.alura_medVoll_api.models.Paciente;
 import br.com.alura.med.voll.alura_medVoll_api.repository.PacienteRepository;
+import io.swagger.v3.oas.annotations.security.SecurityRequirement;
 import jakarta.transaction.Transactional;
 import jakarta.validation.Valid;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -16,6 +17,7 @@ import org.springframework.web.util.UriComponentsBuilder;
 
 @RestController
 @RequestMapping("paciente")
+@SecurityRequirement(name = "bearer-key")
 public class PacienteController {
     @Autowired
     private PacienteRepository pacienteRepository;
