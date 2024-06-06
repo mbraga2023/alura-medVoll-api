@@ -7,6 +7,7 @@ import br.com.alura.med.voll.alura_medVoll_api.models.Consulta;
 import br.com.alura.med.voll.alura_medVoll_api.models.Especialidades;
 import br.com.alura.med.voll.alura_medVoll_api.models.Medico;
 import br.com.alura.med.voll.alura_medVoll_api.models.Paciente;
+import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.DisplayName;
 import org.junit.jupiter.api.Test;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -17,65 +18,73 @@ import org.springframework.test.context.ActiveProfiles;
 
 import java.time.DayOfWeek;
 import java.time.LocalDate;
-import java.time.LocalDateTime;
 import java.time.temporal.TemporalAdjusters;
+import java.util.UUID;
+import java.util.concurrent.ThreadLocalRandom;
 
 import static org.assertj.core.api.Assertions.assertThat;
-
 
 @DataJpaTest
 @AutoConfigureTestDatabase(replace = AutoConfigureTestDatabase.Replace.NONE )
 @ActiveProfiles("test")
-class MedicoRepositoryTest {
+class MedicoRepositoryTest_v2 {
     @Autowired
     private MedicoRepository medicoRepository;
 
     @Autowired
     private TestEntityManager em;
 
+    @BeforeEach
+    void setUp() {
+        // Clear the database before setting up test data
+        em.clear();
 
+        var proximaSegundaAs10 = LocalDate.now()
+                .with(TemporalAdjusters.next(DayOfWeek.MONDAY))
+                .atTime(10, 0);
+
+        // Generate unique email and CRM for each doctor
+        String uniqueEmail = "medico" + UUID.randomUUID().toString() + "@voll.med";
+        String uniqueCrm = generateRandomCrm();
+
+        var medico = new Medico(dadosMedico("Medico", uniqueEmail, uniqueCrm, Especialidades.CARDIOLOGIA));
+        var paciente = new Paciente(dadosPaciente("Paciente", "paciente@email.com", "00000000000"));
+
+        em.persist(medico);
+        em.persist(paciente);
+        em.persist(new Consulta(null, medico, paciente, proximaSegundaAs10));
+        em.flush(); // Flush to synchronize with the database
+    }
+
+    private String generateRandomCrm() {
+        // Generate a random 6-digit number for the CRM
+        int min = 100000;
+        int max = 999999;
+        int randomNum = ThreadLocalRandom.current().nextInt(min, max + 1);
+        return String.format("%06d", randomNum);
+    }
 
     @Test
-    @DisplayName("Deveria devolver null quando unico medico cadastrado nao esta disponivel na data")
+    @DisplayName("Deveria devolver null quando único médico cadastrado não está disponível na data")
     void escolherMedicoAleatorioLivreNaDataCenario1() {
         var proximaSegundaAs10 = LocalDate.now()
                 .with(TemporalAdjusters.next(DayOfWeek.MONDAY))
                 .atTime(10, 0);
-
-        var medico = cadastrarMedico("Medico", "medico@voll.med", "123456", Especialidades.CARDIOLOGIA);
-        var paciente = cadastrarPaciente("Paciente", "paciente@email.com", "00000000000");
-        cadastrarConsulta(medico, paciente, proximaSegundaAs10);
-
         var medicoLivre = medicoRepository.escolherMedicoAleatorioLivreNaData(Especialidades.CARDIOLOGIA, proximaSegundaAs10);
         assertThat(medicoLivre).isNull();
     }
 
-    @Test
-    @DisplayName("Deveria devolver medico quando ele estiver disponivel na data")
+   @Test
+    @DisplayName("Deveria devolver médico quando ele estiver disponível na data")
     void escolherMedicoAleatorioLivreNaDataCenario2() {
         var proximaSegundaAs10 = LocalDate.now()
                 .with(TemporalAdjusters.next(DayOfWeek.MONDAY))
                 .atTime(10, 0);
-        var medico = cadastrarMedico("Medico", "medico@voll.med", "123456", Especialidades.CARDIOLOGIA);
+        var medico = new Medico(dadosMedico("Medico", "medico@voll.med", "123456", Especialidades.CARDIOLOGIA));
+        em.persist(medico);
 
         var medicoLivre = medicoRepository.escolherMedicoAleatorioLivreNaData(Especialidades.CARDIOLOGIA, proximaSegundaAs10);
         assertThat(medicoLivre).isEqualTo(medico);
-    }
-
-    private void cadastrarConsulta(Medico medico, Paciente paciente, LocalDateTime data) {
-        em.persist(new Consulta(null, medico, paciente, data));
-    }
-
-    private Medico cadastrarMedico(String nome, String email, String crm, Especialidades especialidade) {
-        var medico = new Medico(dadosMedico(nome, email, crm, especialidade));
-        em.persist(medico);
-        return medico;
-    }
-
-    private Paciente cadastrarPaciente(String nome, String email, String cpf) {
-        var paciente = new Paciente(dadosPaciente(nome, email, cpf));
-        em.persist(paciente);
-        return paciente;
     }
 
     private DadosCadastroMedico dadosMedico(String nome, String email, String crm, Especialidades especialidade) {
@@ -88,6 +97,7 @@ class MedicoRepositoryTest {
                 "61999999999"
         );
     }
+
 
     private DadosCadastroPaciente dadosPaciente(String nome, String email, String cpf) {
         return new DadosCadastroPaciente(
